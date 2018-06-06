@@ -1,0 +1,98 @@
+#!/bin/bash
+
+MODEL=$(cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}' | sed 's/^ *//g' | sed 's/ *$//g')
+
+case "$1" in
+	off)
+		;;
+	on)
+		;;
+	*)
+		echo $"Usage: $0 {on|off} {usb|wifi|bluetooth|hdmi|pwrled|actled}"
+		exit 1
+esac
+
+for i in "${@:2}"
+do
+	case "$i" in
+		usb)
+			case "$1" in
+				off)
+					echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/unbind
+					;;
+				on)
+					echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind
+					;;
+				*)
+					exit 1
+			esac
+			;;
+		wifi)
+			case "$1" in
+				off)
+					rfkill block wifi
+					;;
+				on)
+					rfkill unblock wifi
+					;;
+			esac
+			;;
+		bluetooth)
+			case "$1" in
+				off)
+					rfkill block bluetooth
+					;;
+				on)
+					rfkill unblock bluetooth
+					;;
+			esac
+			;;
+		hdmi)
+			case "$1" in
+				off)
+					/usr/bin/tvservice -o
+					;;
+				on)
+					/usr/bin/tvservice -p
+					;;
+			esac
+			;;
+		pwrled)
+			case "$MODEL" in
+				000d|9000c1)
+					;;
+				*)
+					case "$1" in
+						off)
+							echo gpio | sudo tee /sys/class/leds/led1/trigger
+							echo 0 | sudo tee /sys/class/leds/led1/brightness
+							;;
+						on)
+							echo input | sudo tee /sys/class/leds/led1/trigger
+							;;
+					esac
+					;;
+			esac
+			;;
+		actled)
+			case "$1" in
+				off)
+					echo gpio | sudo tee /sys/class/leds/led0/trigger
+					case "$MODEL" in
+						9000c1)
+							echo 1 | sudo tee /sys/class/leds/led0/brightness
+							;;
+						*)
+							echo 0 | sudo tee /sys/class/leds/led0/brightness
+							;;
+					esac
+					;;
+				on)
+					echo mmc0 | sudo tee /sys/class/leds/led0/trigger
+					;;
+			esac
+			;;
+		*)
+			echo $"Usage: $0 {on|off} {usb|wifi|bluetooth|hdmi|pwrled|actled}"
+	esac
+done
