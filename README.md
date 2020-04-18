@@ -2,14 +2,6 @@
 
 This script allows for various functions of a Raspberry Pi to be turned off to reduce overall power consumption.
 
-## Installation from repository
-
-`apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8F06D026`
-
-`echo "deb http://apt.acousti.ca stretch main" >> /etc/apt/sources.list`
-
-`apt-get update && apt-get install aao-pwr`
-
 ## Usage
 `aao-pwr <on|off>  <usb|wifi|bluetooth|hdmi|pwrled|actled>...`
 
